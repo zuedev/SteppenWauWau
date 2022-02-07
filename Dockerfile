@@ -1,6 +1,6 @@
 FROM node:16-alpine
 WORKDIR /usr/app
-RUN apk add --no-cache git python3 make gcc
+RUN apk add --no-cache git python3 make gcc musl-dev
 COPY . .
 RUN npm i
 CMD [ "node", "src/main.js" ]
