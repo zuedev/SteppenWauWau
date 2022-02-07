@@ -1,0 +1,16 @@
+{
+  "type": "module",
+  "dependencies": {
+    "discord.js": "^13.0.0-dev.98c6078.1626264203",
+    "mongodb": "^4.0.0",
+    "unleash-client": "^3.9.0",
+    "bufferutil": "^4.0.6",
+    "dotenv": "^16.0.0",
+    "erlpack": "github:discord/erlpack",
+    "utf-8-validate": "^5.0.8",
+    "zlib-sync": "^0.1.7"
+  },
+  "scripts": {
+    "start": "node src/main.js"
+  }
+}
