@@ -214,10 +214,6 @@ function mainInterval() {
       type: "WATCHING",
       name: "pickle rick clips",
     },
-    {
-      type: "PLAYING",
-      name: "some indie horror game",
-    },
   ];
 
   client.user.presence.set({
