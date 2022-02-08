@@ -126,10 +126,4 @@ function wakeUp() {
       2
     )
   );
-
-  sendMessageToApplicationOwner(`I'm awake! Running version \`${commitHash}\``);
-}
-
-function sendMessageToApplicationOwner(message) {
-  client.application.fetch().then((app) => app.owner.send(message));
 }
