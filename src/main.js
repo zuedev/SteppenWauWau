@@ -86,6 +86,7 @@ function registerSlashCommands() {
   });
 
   if (process.env.DEV_SERVER_ID) {
+    client.application.commands.set([]);
     client.guilds
       .fetch(process.env.DEV_SERVER_ID)
       .then((guild) => guild.commands.set(commandsList));
