@@ -6,8 +6,8 @@ import SlashCommands from "./SlashCommands/_index.js";
 import Config from "./config.js";
 
 const client = new Client({
-  intents: new Intents([...Object.keys(Intents.FLAGS)]),
-  partials: ["USER", "CHANNEL", "GUILD_MEMBER", "MESSAGE", "REACTION"],
+  intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGE_REACTIONS],
+  partials: ["MESSAGE", "REACTION"],
   presence: {
     activities: [
       {
@@ -27,31 +27,8 @@ client.login(process.env.TOKEN);
 
 client.on("ready", () => {
   registerSlashCommands();
-  reinitExistingCollectors();
   setInterval(mainInterval, 60000);
   wakeUp();
-});
-
-client.on("messageCreate", (message) => {
-  if (message.author.bot) return;
-
-  if (message.content.startsWith("¬") && !message.content.startsWith("¬ ")) {
-    const commandArray = message.content.substring(1).split(" ");
-    const command = commandArray.shift();
-    const args = commandArray;
-
-    switch (command) {
-      case "owner-announcement":
-        doOwnerAnnouncementCommand(message, args.join(" ").trim());
-        break;
-      case "load-default-karma-emoji":
-        doLoadDefaultKarmaEmojiCommand(message);
-        break;
-      default:
-        message.react("🤔").then(message.reply("Command not recognised!"));
-        break;
-    }
-  }
 });
 
 client.on("interactionCreate", async (interaction) => {
@@ -88,52 +65,6 @@ client.on("messageReactionRemove", async (messageReaction, user) => {
   if (res) updateKarma(messageReaction.message.member, res.karmaValue * -1);
 });
 
-function doLoadDefaultKarmaEmojiCommand(message) {
-  if (message.guild === null)
-    return message.reply("You can only do that in a guild you own! :O");
-  if (message.author.id !== message.guild.ownerId)
-    return message.reply("You're not the guild owner! >:(");
-
-  try {
-    for (const key in Config.emoji) {
-      if (Config.emoji[key].default) {
-        message.guild.emojis.create(
-          `src/Assets/defaultEmoji/${Config.emoji[key].fileName}`,
-          key
-        );
-      }
-    }
-    message.reply("Default karma emoji has been loaded! :D");
-  } catch (error) {
-    message.reply(
-      "Something went wrong... Please make sure you have 4 normal emoji and 2 animated emoji slots available!"
-    );
-    try {
-      for (const key in Config.emoji) {
-        if (Config.emoji[key].default) {
-          message.guild.emojis.cache.find((e) => e.name === key).delete();
-        }
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  }
-}
-
-async function doOwnerAnnouncementCommand(message, announcementText) {
-  if (
-    message.author.id !== "723361818940276736" ||
-    announcementText.length === 0
-  )
-    return;
-
-  client.guilds.cache.array().forEach((guild) => {
-    guild
-      .fetchOwner({ force: true })
-      .then((owner) => owner.send(announcementText));
-  });
-}
-
 async function updateKarma(member, value) {
   await mongocluster
     .db(process.env.MONGO_DB)
@@ -161,47 +92,6 @@ function registerSlashCommands() {
   } else {
     client.application.commands.set(commandsList);
   }
-}
-
-function reinitExistingCollectors() {
-  mongocluster
-    .db(process.env.MONGO_DB)
-    .collection("events")
-    .find({
-      messageId: { $exists: true },
-    })
-    .toArray()
-    .then((array) => {
-      let createEvent = SlashCommands.find(
-        (e) => e.interactionData.name === "createevent"
-      );
-
-      array.forEach((event) => {
-        client.channels
-          .fetch(event.channelId)
-          .then((channel) =>
-            channel.messages.fetch(event.messageId).then((message) => {
-              let collector = message.createReactionCollector({
-                dispose: true,
-                filter: (reaction, user) =>
-                  reaction.emoji.name === "🟩" && !user.bot,
-              });
-              collector.on("collect", (reaction, user) =>
-                createEvent.participantsHandler(reaction, user, "collect")
-              );
-              collector.on("remove", (reaction, user) =>
-                createEvent.participantsHandler(reaction, user, "remove")
-              );
-            })
-          )
-          .catch((e) => {
-            mongocluster
-              .db(process.env.MONGO_DB)
-              .collection("events")
-              .findOneAndDelete({ messageId: event.messageId });
-          });
-      });
-    });
 }
 
 function mainInterval() {
