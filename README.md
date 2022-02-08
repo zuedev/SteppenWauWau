@@ -1,3 +1,5 @@
+<img src="/icon_original.png"/>
+
 # Steppen Wau Wau
 
 ## How to get the bot
