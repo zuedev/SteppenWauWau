@@ -27,7 +27,7 @@ client.login(process.env.TOKEN);
 
 client.on("ready", () => {
   registerSlashCommands();
-  setInterval(mainInterval, 60000);
+  setInterval(mainInterval, process.env.MAIN_INTERVAL_TIME || 60000);
   wakeUp();
 });
 
@@ -103,22 +103,6 @@ function mainInterval() {
     {
       type: "WATCHING",
       name: "pickle rick clips",
-    },
-    {
-      type: "COMPETING",
-      name: "to be the best boi",
-    },
-    {
-      type: "STREAMING",
-      name: "HOT TUB STREAM NO CLICKBAIT",
-    },
-    {
-      type: "LISTENING",
-      name: "The Communist Manifesto",
-    },
-    {
-      type: "WATCHING",
-      name: "International War Crimes",
     },
   ];
 
